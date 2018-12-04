@@ -610,6 +610,8 @@ class vtkVisualization:
         # Setting the camera and the background color to the renders
         self.set_camera_backcolor(color=bg_color)
 
+        self.thread_lock = None
+
         # Creating the axis
         for e, r in enumerate(self.ren_list):
             # add axes actor to all renderers
@@ -1444,19 +1446,29 @@ class vtkVisualization:
 
     def update_surfaces_real_time(self, geo_data):
 
-        self.interp_data.update_interpolator(geo_data)
-        lith_block, fault_block = gp.compute_model(self.interp_data, get_potential_at_interfaces=False)
-     #   print(lith_block)
-     #   print(fault_block)
+        def gempy_logic(geo_data):
+            self.interp_data.update_interpolator(geo_data)
+            lith_block, fault_block = gp.compute_model(self.interp_data, get_potential_at_interfaces=False)
+         #   print(lith_block)
+         #   print(fault_block)
 
-        try:
-            v_l, s_l = gp.get_surfaces(self.interp_data, lith_block[1], fault_block[1::2], original_scale=True)
-        except IndexError:
             try:
-                v_l, s_l = gp.get_surfaces(self.interp_data, lith_block[1], None, original_scale=True)
+                v_l, s_l = gp.get_surfaces(self.interp_data, lith_block[1], fault_block[1::2], original_scale=True)
             except IndexError:
-                v_l, s_l = gp.get_surfaces(self.interp_data, None, fault_block[1::2], original_scale=True)
-        return v_l, s_l
+                try:
+                    v_l, s_l = gp.get_surfaces(self.interp_data, lith_block[1], None, original_scale=True)
+                except IndexError:
+                    v_l, s_l = gp.get_surfaces(self.interp_data, None, fault_block[1::2], original_scale=True)
+            return v_l, s_l
+
+        if self.thread_lock is None:
+            v, s = gempy_logic(geo_data)
+
+        else:
+            with self.thread_lock:
+                v, s = gempy_logic(geo_data)
+
+        return v, s
 
     @staticmethod
     def export_vtk_lith_block(geo_data, lith_block, path=None):

@@ -115,7 +115,7 @@ class StratigraphicPile(object):
     """
     Class to create the interactive stratigraphic pile
     """
-    def __init__(self, geo_data):
+    def __init__(self, geo_data, only_formations=False):
 
         # Set the values of matplotlib
         fig = plt.figure()
@@ -177,9 +177,14 @@ class StratigraphicPile(object):
             formation_rect[formation] = dr
         plt.legend(bbox_to_anchor=(1.1, 1.05))
         plt.ion()
+
+        if only_formations is True:
+            formation_label = r'Formations'
+        else:
+            formation_label = r'Faults/Formations'
         ax.text(1, self.anch_series.max().values.max() + self.thick_series/2 + 2, r'Series', fontsize=15,
                 fontweight='bold', bbox={'facecolor':'gray', 'alpha':0.5, 'pad':10}, horizontalalignment='center')
-        ax.text(4, self.anch_series.max().values.max() + self.thick_series/2 + 2, r'Faults/Formations', fontsize=15,
+        ax.text(4, self.anch_series.max().values.max() + self.thick_series/2 + 2, formation_label, fontsize=15,
                 fontweight='bold', bbox={'facecolor':'gray', 'alpha':0.5, 'pad':10}, horizontalalignment='center')
 
         self.figure = plt.gcf()
