@@ -275,7 +275,7 @@ def get_data(geo_data, itype='all', numeric=False, verbosity=0):
     return geo_data.get_data(itype=itype, numeric=numeric, verbosity=verbosity)
 
 
-def get_sequential_pile(geo_data, only_formations=False, only_legend=True, path=None, **kwargs):
+def get_sequential_pile(geo_data, only_formations=False, only_legend=False, path=None, **kwargs):
     """
     Visualize an interactive stratigraphic pile to move around the formations and the series. IMPORTANT NOTE:
     To have the interactive properties it is necessary the use of an interactive backend. (In notebook use:
@@ -292,16 +292,17 @@ def get_sequential_pile(geo_data, only_formations=False, only_legend=True, path=
         formations_series = geo_data.faults.index[~geo_data.faults['isFault']]
         geo_temp = select_series(geo_data, formations_series)
         pile_object = StratigraphicPile(geo_temp, only_formations=only_formations)
-
+        n_series = geo_temp.series.columns.size
     else:
         pile_object = StratigraphicPile(geo_data)
+        n_series = geo_data.series.columns.size
 
     if path is not None:
         if only_legend is True:
             import matplotlib.pyplot as plt
             handles, labels = pile_object.figure.axes[0].get_legend_handles_labels()
             fig, ax = plt.subplots()
-            ax.legend(handles, labels)
+            ax.legend(handles[n_series:], labels[n_series:])
             ax.xaxis.set_visible(False)
             ax.yaxis.set_visible(False)
             for v in ax.spines.values():
