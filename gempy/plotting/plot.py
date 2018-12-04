@@ -39,10 +39,10 @@ import gempy as _gempy
 
 class vtkPlot():
     def __init__(self, geo_data, alpha=1,
-                     size=(1920, 1080), fullscreen=False, bg_color=None, verbose=0):
+                     size=(1920, 1080), fullscreen=False, bg_color=None, verbose=0, lock=None):
 
         self.geo_data = geo_data
-
+        self.thread_lock = lock
         self.verbose = verbose
         self.alpha = alpha
         self.size = size
@@ -117,12 +117,16 @@ class vtkPlot():
         self.vv.set_orientations()
         self.vv.render_model(**kwargs)
 
-    def set_real_time_on(self, interp_data):
+    def set_real_time_on(self, interp_data, lock=None):
 
         #self.geo_data = interp_data.geo_data_res
         self.restart()
         #self.vv.geo_data = interp_data.geo_data_res
         self.vv.interp_data = interp_data
+        if lock is None:
+            self.vv.thread_lock = self.thread_lock
+        else:
+            self.vv.thread_lock = self.thread_lock
         self.vv.real_time = True
 
     def plot_surfaces_3D_real_time(self, interp_data, vertices_l=None, simplices_l=None,
